@@ -1,4 +1,4 @@
-package scalding.job
+package analytics.scalding.job
 
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TypedSink

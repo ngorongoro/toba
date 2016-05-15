@@ -3,6 +3,7 @@ package analytics.spark.job
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 
+/** Simple word count job using Dataset API */
 class WordCount(ctx: SparkContext) {
 
   val sqlCtx = SQLContext.getOrCreate(ctx)
@@ -17,7 +18,7 @@ class WordCount(ctx: SparkContext) {
     .flatMap(_.split(" "))
     .filter(_ != "")
 
-  val counts = words 
+  val counts = words
     .groupBy(_.toLowerCase)
     .count()
 

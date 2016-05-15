@@ -2,6 +2,7 @@ package analytics.spark.job
 
 import org.apache.spark.streaming.StreamingContext
 
+/** Simple word count stream processing job */
 class WordCount(streamingCtx: StreamingContext) {
   val dir = getClass.getResource("/").getFile
   val lines = streamingCtx.textFileStream(dir)

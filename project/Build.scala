@@ -92,10 +92,10 @@ object CrossPlatformAnalytics extends Build {
     file("spark-common"),
     settings = commonSettings ++ publishSettings ++ Seq(
       libraryDependencies ++= Seq(
-        "org.slf4j" % "log4j-over-slf4j" % "1.7.12",
-        "org.apache.spark" %% "spark-core" % SparkVersion
-          exclude("log4j", "log4j")
-          exclude("org.slf4j","slf4j-log4j12")
+        "org.slf4j" % "log4j-over-slf4j" % "1.7.12"
+      ) ++ withExclusions(
+        "org.apache.spark" %% "spark-core" % SparkVersion,
+        "org.apache.spark" %% "spark-sql" % SparkVersion
       )
     )
   ).dependsOn(common)
@@ -104,16 +104,10 @@ object CrossPlatformAnalytics extends Build {
     "spark-streaming",
     file("spark-streaming"),
     settings = privateSettings ++ commonExecutableSettings ++ Seq(
-      libraryDependencies ++= Seq(
-        "org.apache.spark" %% "spark-streaming" % SparkVersion
-          exclude("log4j", "log4j")
-          exclude("org.slf4j","slf4j-log4j12"),
-        "org.apache.spark" %% "spark-streaming-kafka" % SparkVersion
-          exclude("log4j", "log4j")
-          exclude("org.slf4j","slf4j-log4j12"),
+      libraryDependencies ++= withExclusions(
+        "org.apache.spark" %% "spark-streaming" % SparkVersion,
+        "org.apache.spark" %% "spark-streaming-kafka" % SparkVersion,
         "org.apache.kafka" %% "kafka" % KafkaVersion
-          exclude("log4j", "log4j")
-          exclude("org.slf4j","slf4j-log4j12")
       ),
       mainClass in (Compile, run) := Some("analytics.spark.Tool"),
       mainClass in assembly := Some("analytics.spark.Tool")
@@ -125,7 +119,6 @@ object CrossPlatformAnalytics extends Build {
     file("spark-batch"),
     settings = privateSettings ++ commonExecutableSettings ++ Seq(
       libraryDependencies ++= Seq(
-        "org.apache.spark" %% "spark-sql" % SparkVersion
       ),
       mainClass in (Compile, run) := Some("analytics.spark.Tool"),
       mainClass in assembly := Some("analytics.spark.Tool")
@@ -146,4 +139,13 @@ object CrossPlatformAnalytics extends Build {
       mainClass in assembly := Some("com.twitter.scalding.Tool")
     )
   ).dependsOn(common)
+
+  def withExclusions(moduleIds: ModuleID*): Seq[ModuleID] = {
+    val exclusions = Seq("log4j" -> "log4j", "org.slf4j" -> "slf4j-log4j12")
+    moduleIds.map {
+      exclusions.foldLeft(_) {
+        case (dependency, (group, artifact)) => dependency.exclude(group, artifact)
+      }
+    }
+  }
 }
